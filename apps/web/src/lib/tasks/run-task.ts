@@ -37,10 +37,10 @@ export async function runTask(taskId: string): Promise<void> {
   };
 
   try {
-    await handler(task.payload, { taskId, setStep });
+    const result = await handler(task.payload, { taskId, setStep });
     await db
       .update(tasks)
-      .set({ status: "done", finishedAt: new Date() })
+      .set({ status: "done", finishedAt: new Date(), result: result ?? null })
       .where(eq(tasks.id, taskId))
       .returning();
   } catch (error) {

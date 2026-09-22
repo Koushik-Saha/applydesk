@@ -5,7 +5,16 @@ import { db } from "@/lib/db/client";
 import { aiUsage } from "@/lib/db/schema";
 import { estimateCostUsd } from "./pricing";
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+// Lazy: constructing eagerly at module load means simply *importing* this
+// file (e.g. transitively, via lib/tasks/handlers) constructs a real
+// Anthropic client — which throws under Vitest's jsdom environment
+// ("browser-like environment") even when generateStructured() is never
+// called.
+let anthropicClient: Anthropic | undefined;
+function getClient(): Anthropic {
+  anthropicClient ??= new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  return anthropicClient;
+}
 
 export interface GenerateStructuredParams<T> {
   /** Pipeline step name, logged to ai_usage (e.g. "extract_requirements"). */
@@ -48,7 +57,7 @@ export async function generateStructured<T>({
   let lastError: Error = new GenerationValidationError("generateStructured: no attempts made");
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    const message = await anthropic.messages.create(
+    const message = await getClient().messages.create(
       { model, system, max_tokens: maxTokens, messages, output_config: { format } },
       { timeout: timeoutMs },
     );

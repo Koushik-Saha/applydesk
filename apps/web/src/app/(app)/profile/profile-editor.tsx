@@ -5,15 +5,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { MasterProfile } from "@applydesk/shared";
 import { Button } from "@/components/ui/button";
-import { CollapsiblePanel } from "./collapsible-panel";
-import { ContactSection } from "./contact-section";
-import { SummarySection } from "./summary-section";
-import { ExperienceSection } from "./experience-section";
-import { ProjectsSection } from "./projects-section";
-import { EducationSection } from "./education-section";
-import { CertificationsSection } from "./certifications-section";
-import { PublicationsSection } from "./publications-section";
-import { SkillsSection } from "./skills-section";
+import { ProfileSections } from "./profile-sections";
+import { ImportUploadDialog } from "./import-upload-dialog";
 
 interface ProfileEditorProps {
   initialProfile: MasterProfile;
@@ -76,73 +69,17 @@ export function ProfileEditor({ initialProfile, version }: ProfileEditorProps) {
             "Not saved yet"
           )}
         </div>
-        <Button onClick={save} disabled={!dirty || saving}>
-          {saving ? "Saving…" : "Save"}
-        </Button>
+        <div className="flex items-center gap-2">
+          <ImportUploadDialog />
+          <Button onClick={save} disabled={!dirty || saving}>
+            {saving ? "Saving…" : "Save"}
+          </Button>
+        </div>
       </div>
 
       {error && <p className="text-sm text-[var(--missing)]">{error}</p>}
 
-      <CollapsiblePanel title="Contact">
-        <ContactSection contact={profile.contact} onChange={(contact) => setProfile((p) => ({ ...p, contact }))} />
-      </CollapsiblePanel>
-
-      <CollapsiblePanel title="Summary">
-        <SummarySection summary={profile.summary} onChange={(summary) => setProfile((p) => ({ ...p, summary }))} />
-      </CollapsiblePanel>
-
-      <CollapsiblePanel title="Experience" meta={<span className="font-mono text-xs">{profile.experiences.length}</span>}>
-        <ExperienceSection
-          experiences={profile.experiences}
-          onChange={(experiences) => setProfile((p) => ({ ...p, experiences }))}
-        />
-      </CollapsiblePanel>
-
-      <CollapsiblePanel
-        title="Projects"
-        defaultOpen={false}
-        meta={<span className="font-mono text-xs">{profile.projects.length}</span>}
-      >
-        <ProjectsSection projects={profile.projects} onChange={(projects) => setProfile((p) => ({ ...p, projects }))} />
-      </CollapsiblePanel>
-
-      <CollapsiblePanel
-        title="Education"
-        defaultOpen={false}
-        meta={<span className="font-mono text-xs">{profile.education.length}</span>}
-      >
-        <EducationSection education={profile.education} onChange={(education) => setProfile((p) => ({ ...p, education }))} />
-      </CollapsiblePanel>
-
-      <CollapsiblePanel
-        title="Certifications"
-        defaultOpen={false}
-        meta={<span className="font-mono text-xs">{profile.certifications.length}</span>}
-      >
-        <CertificationsSection
-          certifications={profile.certifications}
-          onChange={(certifications) => setProfile((p) => ({ ...p, certifications }))}
-        />
-      </CollapsiblePanel>
-
-      <CollapsiblePanel
-        title="Publications"
-        defaultOpen={false}
-        meta={<span className="font-mono text-xs">{profile.publications.length}</span>}
-      >
-        <PublicationsSection
-          publications={profile.publications}
-          onChange={(publications) => setProfile((p) => ({ ...p, publications }))}
-        />
-      </CollapsiblePanel>
-
-      <CollapsiblePanel
-        title="Skills"
-        defaultOpen={false}
-        meta={<span className="font-mono text-xs">{profile.skills.length}</span>}
-      >
-        <SkillsSection skills={profile.skills} onChange={(skills) => setProfile((p) => ({ ...p, skills }))} />
-      </CollapsiblePanel>
+      <ProfileSections profile={profile} onChange={setProfile} />
     </div>
   );
 }

@@ -22,6 +22,10 @@ export const tasks = pgTable(
     currentStep: text("current_step"),
     attempts: integer("attempts").notNull().default(0),
     error: text("error"),
+    // Not in PROJECT_SPEC.md's table listing either — profile_import (and
+    // future AI tasks) need to hand back a result for the caller to show
+    // (e.g. a review screen), not just a pass/fail status.
+    result: jsonb("result"),
     lockedAt: timestamp("locked_at", { withTimezone: true }),
     finishedAt: timestamp("finished_at", { withTimezone: true }),
     ...timestamps,

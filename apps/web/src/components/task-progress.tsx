@@ -20,6 +20,7 @@ interface Task {
   currentStep: string | null;
   attempts: number;
   error: string | null;
+  result: unknown;
 }
 
 interface TaskProgressProps {

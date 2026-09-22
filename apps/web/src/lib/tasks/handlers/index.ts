@@ -6,5 +6,5 @@
 // which route's request ends up calling runTask() (enqueue, retry, or
 // stale recovery).
 //
-// import "./profile-import"; // (M4)
+import "./profile-import";
 export {};
