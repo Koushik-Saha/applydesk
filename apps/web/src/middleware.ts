@@ -41,8 +41,10 @@ export const config = {
      * - /login (the sign-in page itself)
      * - /api/auth/* (Better Auth's own routes)
      * - /api/ext/* (extension routes; bearer-token auth, not cookies)
+     * - /api/tasks/* (polled by both the site and the extension; bearer or
+     *   cookie, checked in the route handler via requireOwnerOrExtensionToken)
      * - Next internals and static assets
      */
-    "/((?!login|api/auth|api/ext|_next/static|_next/image|favicon.ico).*)",
+    "/((?!login|api/auth|api/ext|api/tasks|_next/static|_next/image|favicon.ico).*)",
   ],
 };

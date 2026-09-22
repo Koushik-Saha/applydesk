@@ -16,6 +16,10 @@ export const tasks = pgTable(
     jobId: uuid("job_id").references(() => jobs.id, { onDelete: "cascade" }),
     payload: jsonb("payload").notNull(),
     status: text("status").$type<TaskStatus>().notNull().default("queued"),
+    // DESIGN.md §7 — "AI in progress: step list ... each step checks off
+    // live." Not in PROJECT_SPEC.md's table listing; added so TaskProgress
+    // has real per-step granularity instead of one coarse status.
+    currentStep: text("current_step"),
     attempts: integer("attempts").notNull().default(0),
     error: text("error"),
     lockedAt: timestamp("locked_at", { withTimezone: true }),
