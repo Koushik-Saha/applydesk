@@ -8,4 +8,5 @@
 //
 import "./profile-import";
 import "./job-analyze";
+import "./job-generate";
 export {};

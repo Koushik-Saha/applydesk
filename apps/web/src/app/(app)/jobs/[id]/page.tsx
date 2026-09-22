@@ -1,9 +1,16 @@
 import { notFound, redirect } from "next/navigation";
+import {
+  coverLetterContentSchema,
+  documentLintSchema,
+  documentValidationSchema,
+  resumeContentSchema,
+} from "@applydesk/shared";
 import { requireOwner } from "@/lib/auth/require-owner";
 import { AuthError } from "@/lib/auth/errors";
 import { getJob, getLatestAnalysis } from "@/lib/jobs/service";
 import { getLatestTaskForJob } from "@/lib/tasks/get-task";
 import { getProfileVersionById } from "@/lib/profile/service";
+import { listDocuments } from "@/lib/documents/service";
 import { requirementsSchema, evidenceItemSchema } from "@/lib/ai/prompts/job-analyze";
 import { JobDetail } from "./job-detail";
 import { z } from "zod";
@@ -35,31 +42,58 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
   const job = await getJob(ownerId, id);
   if (!job) notFound();
 
-  const [analysis, analyzeTask] = await Promise.all([
+  const [analysis, analyzeTask, generateTask, documentRows] = await Promise.all([
     getLatestAnalysis(job.id),
     getLatestTaskForJob(job.id, "job_analyze"),
+    getLatestTaskForJob(job.id, "job_generate"),
+    listDocuments(job.id),
   ]);
 
-  // evidenceBulletIds refer to whichever profile version was active WHEN
-  // that analysis ran, not necessarily today's active profile.
-  let bulletTextById: Record<string, string> = {};
-  if (analysis) {
-    const profile = await getProfileVersionById(analysis.profileVersionId);
-    if (profile) {
-      const bullets = [
-        ...profile.experiences.flatMap((e) => e.bullets),
-        ...profile.projects.flatMap((p) => p.bullets),
-      ];
-      bulletTextById = Object.fromEntries(bullets.map((b) => [b.id, b.text]));
-    }
+  // evidenceBulletIds / sourceBulletIds refer to whichever profile version
+  // was active WHEN that analysis/generation ran, not necessarily today's.
+  const profileVersionIds = new Set<string>();
+  if (analysis) profileVersionIds.add(analysis.profileVersionId);
+  for (const doc of documentRows) profileVersionIds.add(doc.profileVersionId);
+
+  const bulletTextById: Record<string, string> = {};
+  for (const versionId of profileVersionIds) {
+    const profile = await getProfileVersionById(versionId);
+    if (!profile) continue;
+    const bullets = [
+      ...profile.experiences.flatMap((e) => e.bullets),
+      ...profile.projects.flatMap((p) => p.bullets),
+    ];
+    for (const b of bullets) bulletTextById[b.id] = b.text;
   }
+
+  const resumeVersions = documentRows
+    .filter((d) => d.kind === "resume")
+    .map((d) => ({
+      id: d.id,
+      version: d.version,
+      content: resumeContentSchema.parse(d.content),
+      lint: documentLintSchema.parse(d.lint ?? { warnings: [] }),
+      validation: documentValidationSchema.parse(d.validation ?? { violations: [], fallbackBulletIndexes: [] }),
+      createdAt: d.createdAt.toISOString(),
+    }));
+
+  const coverLetterVersions = documentRows
+    .filter((d) => d.kind === "cover_letter")
+    .map((d) => ({
+      id: d.id,
+      version: d.version,
+      content: coverLetterContentSchema.parse(d.content),
+      lint: documentLintSchema.parse(d.lint ?? { warnings: [] }),
+      validation: documentValidationSchema.parse(d.validation ?? { violations: [], fallbackBulletIndexes: [] }),
+      createdAt: d.createdAt.toISOString(),
+    }));
 
   return (
     <JobDetail
       // remounts JobDetail with fresh props whenever the underlying data
       // actually changes (e.g. after router.refresh() once analysis
       // completes) instead of leaving stale client state in place.
-      key={`${job.status}-${analysis?.id ?? "none"}`}
+      key={`${job.status}-${analysis?.id ?? "none"}-${resumeVersions.length}-${coverLetterVersions.length}`}
       job={{
         id: job.id,
         title: job.title,
@@ -83,6 +117,9 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
         }
       }
       analyzeTask={analyzeTask}
+      generateTask={generateTask}
+      resumeVersions={resumeVersions}
+      coverLetterVersions={coverLetterVersions}
       bulletTextById={bulletTextById}
     />
   );

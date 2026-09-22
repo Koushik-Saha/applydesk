@@ -34,14 +34,19 @@ export interface KeywordMatchResult {
   missing: string[];
 }
 
-// PROJECT_SPEC.md §4.3 — "keywords found in profile / keywords.length."
-// A keyword counts as found if it's an exact (case-insensitive) match
-// against a tagged skill, or appears as a whole word/phrase in a bullet's
-// or the summary's own text — catches real mentions without the false
-// positives of loose substring matching (e.g. "Go" inside "Google").
-export function matchKeywords(keywords: string[], profile: MasterProfile): KeywordMatchResult {
-  const terms = profileTermSet(profile);
-  const text = allBulletText(profile);
+// Shared core: a keyword counts as found if it's an exact (case-insensitive)
+// match against one of `terms` (tagged skills), or appears as a whole
+// word/phrase in `text` — catches real mentions without the false positives
+// of loose substring matching (e.g. "Go" inside "Google"). Used both for the
+// pre-score (against the full master profile) and the tailored resume's
+// post-score (§4.4 step 5, "before -> after" coverage) against just what
+// actually made it into that document.
+export function matchKeywordsInText(
+  keywords: string[],
+  text: string,
+  terms: Set<string> = new Set(),
+): KeywordMatchResult {
+  const lowerText = text.toLowerCase();
   const found: string[] = [];
   const missing: string[] = [];
 
@@ -49,9 +54,14 @@ export function matchKeywords(keywords: string[], profile: MasterProfile): Keywo
     const normalized = normalize(keyword);
     if (!normalized) continue;
     const isFound =
-      terms.has(normalized) || new RegExp(`\\b${escapeRegExp(normalized)}\\b`, "i").test(text);
+      terms.has(normalized) || new RegExp(`\\b${escapeRegExp(normalized)}\\b`, "i").test(lowerText);
     (isFound ? found : missing).push(keyword);
   }
 
   return { found, missing };
+}
+
+// PROJECT_SPEC.md §4.3 — "keywords found in profile / keywords.length."
+export function matchKeywords(keywords: string[], profile: MasterProfile): KeywordMatchResult {
+  return matchKeywordsInText(keywords, allBulletText(profile), profileTermSet(profile));
 }
