@@ -1,0 +1,90 @@
+@import "tailwindcss";
+@import "@applydesk/ui-preset/tokens.css";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Bridge DESIGN.md tokens (packages/ui-preset/src/tokens.css) into the
+ * variable names shadcn/ui (base-nova style) components expect. Every
+ * value here is a reference into --bg/--surface/--accent/... — never a
+ * new literal color. shadcn's own "--accent" means "subtle hover/selected
+ * background", which DESIGN.md calls --accent-soft — not our brand color.
+ */
+:root {
+  --card: var(--surface);
+  --card-foreground: var(--text);
+  --popover: var(--surface);
+  --popover-foreground: var(--text);
+
+  --primary: var(--accent);
+  --primary-foreground: #ffffff;
+
+  --secondary: var(--surface-muted);
+  --secondary-foreground: var(--text);
+
+  --muted: var(--surface-muted);
+  --muted-foreground: var(--text-muted);
+
+  --accent-bg: var(--accent-soft);
+  --accent-bg-foreground: var(--text);
+
+  --destructive: var(--missing);
+  --destructive-foreground: #ffffff;
+
+  --input: var(--border);
+  --ring: var(--accent);
+}
+
+.dark {
+  --primary-foreground: var(--color-stone-950);
+}
+
+@theme inline {
+  --color-background: var(--bg);
+  --color-foreground: var(--text);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent-bg);
+  --color-accent-foreground: var(--accent-bg-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* DESIGN.md §3 — 6px controls (rounded-md / rounded-lg), 10px panels (rounded-xl) */
+  --radius-sm: 4px;
+  --radius-md: var(--radius-control);
+  --radius-lg: var(--radius-control);
+  --radius-xl: var(--radius-panel);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+}
+
+/*
+ ---break---
+ */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}

@@ -1,0 +1,73 @@
+/**
+ * ApplyDesk design tokens — DESIGN.md §1-3.
+ * Consumers `@import "tailwindcss";` first, then this file, then map these
+ * semantic variables into whatever component-library variables they need
+ * (see apps/web/src/app/globals.css for the shadcn/ui bridge).
+ */
+
+:root {
+  /* DESIGN.md §2 — light */
+  --bg: var(--color-stone-50);
+  --surface: #ffffff;
+  --surface-muted: var(--color-stone-100);
+  --border: var(--color-stone-200);
+  --text: var(--color-stone-900);
+  --text-muted: var(--color-stone-500);
+  --accent: var(--color-teal-700);
+  --accent-soft: var(--color-teal-50);
+
+  /* semantic, sparingly, always paired with icon/label */
+  --met: var(--color-emerald-600);
+  --partial: var(--color-amber-500);
+  --missing: var(--color-rose-600);
+  --stretch: var(--color-sky-500);
+  --flag: var(--color-orange-500);
+
+  /* DESIGN.md §1 — set by next/font in apps/web; safe fallbacks here */
+  --font-sans: ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", monospace;
+}
+
+.dark {
+  /* DESIGN.md §2 — dark */
+  --bg: var(--color-stone-950);
+  --surface: var(--color-stone-900);
+  --surface-muted: var(--color-stone-800);
+  --border: var(--color-stone-800);
+  --text: var(--color-stone-100);
+  --text-muted: var(--color-stone-400);
+  --accent: var(--color-teal-400);
+  --accent-soft: var(--color-teal-950);
+
+  --met: var(--color-emerald-500);
+  --partial: var(--color-amber-400);
+  --missing: var(--color-rose-500);
+  --stretch: var(--color-sky-400);
+  --flag: var(--color-orange-400);
+}
+
+/* Tailwind v4 theme mapping — generates bg-bg, text-text-muted, border-border,
+   bg-accent-soft, text-met, bg-partial, etc. */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border: var(--border);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+
+  --color-met: var(--met);
+  --color-partial: var(--partial);
+  --color-missing: var(--missing);
+  --color-stretch: var(--stretch);
+  --color-flag: var(--flag);
+
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  /* DESIGN.md §3 — 6px controls, 10px panels (rounded-control / rounded-panel) */
+  --radius-control: 6px;
+  --radius-panel: 10px;
+}

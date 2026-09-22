@@ -1,0 +1,44 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# env
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# next.js
+apps/web/.next/
+apps/web/out/
+
+# wxt / extension build
+apps/extension/.wxt/
+apps/extension/.output/
+
+# turbo
+.turbo/
+**/.turbo/
+
+# build output
+dist/
+build/
+
+# testing
+coverage/
+playwright-report/
+test-results/
+blob-report/
+
+# misc
+.DS_Store
+*.pem
+*.tsbuildinfo
+.vscode/*
+!.vscode/extensions.json
+
+# local-only docs/notes — not for the repo
+/CLAUDE.md
+/DESIGN.md
+/PROJECT_SPEC.md
+/job.txt

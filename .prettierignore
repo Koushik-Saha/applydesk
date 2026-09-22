@@ -1,0 +1,8 @@
+pnpm-lock.yaml
+.turbo
+.next
+.wxt
+.output
+dist
+coverage
+playwright-report
