@@ -1,0 +1,18 @@
+Staff Research Scientist — Reinforcement Learning
+
+We are hiring a Staff Research Scientist to lead fundamental research in reinforcement learning.
+
+Requirements:
+- PhD in Machine Learning, Statistics, or a related field
+- 8+ years publishing peer-reviewed reinforcement learning research
+- Deep expertise in JAX and distributed training on TPU pods
+- Track record of first-author papers at NeurIPS, ICML, or ICLR
+- Active US Department of Defense security clearance required
+
+Nice to have:
+- Experience with robotics simulation environments
+- Contributions to open-source RL frameworks
+
+This role requires relocation to our Geneva research lab; no remote or sponsorship available.
+
+Keywords: JAX, reinforcement learning, TPU, NeurIPS, ICML, robotics, security clearance

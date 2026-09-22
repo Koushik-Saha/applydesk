@@ -1,0 +1,17 @@
+Senior Backend Engineer — Payments Platform
+
+We're looking for a Senior Backend Engineer to join our Payments Platform team.
+
+Requirements:
+- 5+ years of backend engineering experience
+- Strong experience with TypeScript or Go
+- Experience designing and operating REST APIs at scale
+- Experience with PostgreSQL or another relational database
+- Experience with distributed systems and message queues (Kafka, SQS, or similar)
+
+Nice to have:
+- Experience with Kubernetes
+- Experience in the payments or fintech space
+- Familiarity with Terraform or other infrastructure-as-code tools
+
+Keywords: TypeScript, Go, PostgreSQL, Kafka, REST, Kubernetes, Terraform, distributed systems

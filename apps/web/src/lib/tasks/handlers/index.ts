@@ -7,4 +7,5 @@
 // stale recovery).
 //
 import "./profile-import";
+import "./job-analyze";
 export {};

@@ -1,0 +1,16 @@
+Frontend Engineer — Growth Team
+
+Join our Growth team to build customer-facing web experiences.
+
+Requirements:
+- 3+ years of frontend engineering experience
+- Strong experience with React
+- Experience with TypeScript
+- Experience with automated testing (unit and end-to-end)
+
+Nice to have:
+- Experience with Next.js
+- Experience with design systems and component libraries
+- Experience with A/B testing tools
+
+Keywords: React, TypeScript, Next.js, Playwright, design systems, A/B testing

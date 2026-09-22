@@ -88,6 +88,19 @@ export async function listProfileVersions(ownerId: string): Promise<ProfileVersi
   return rows;
 }
 
+// Used by job_analyses' evidence display — evidenceBulletIds refer to
+// whatever version was active WHEN THAT ANALYSIS RAN, which may not be the
+// current active profile if it's since been edited.
+export async function getProfileVersionById(versionId: string): Promise<MasterProfile | null> {
+  const [row] = await db
+    .select({ data: profileVersions.data })
+    .from(profileVersions)
+    .where(eq(profileVersions.id, versionId))
+    .limit(1);
+
+  return row ? masterProfileSchema.parse(row.data) : null;
+}
+
 export class VersionNotFoundError extends Error {}
 
 // "Restore" repoints activeVersionId at an existing, immutable version row —

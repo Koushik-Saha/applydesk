@@ -60,6 +60,11 @@ export const jobs = pgTable(
     rawDescription: text("raw_description").notNull(),
     descriptionHash: text("description_hash").notNull(),
     status: text("status").$type<JobStatus>().notNull().default("new"),
+    // Denormalized from the latest job_analyses row — not in PROJECT_SPEC.md's
+    // table listing, added so the jobs list/table can sort by score without
+    // a join (DESIGN.md "Jobs table" needs a sortable Score column).
+    score: integer("score"),
+    band: text("band"),
     statusChangedAt: timestamp("status_changed_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
