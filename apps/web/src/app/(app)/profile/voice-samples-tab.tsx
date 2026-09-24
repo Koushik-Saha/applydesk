@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { EmptyState } from "@/components/empty-state";
 import { ErrorState } from "@/components/error-state";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 
 interface VoiceSample {
   id: string;
@@ -94,8 +95,8 @@ export function VoiceSamplesTab({ initialSamples }: { initialSamples: VoiceSampl
           disabled={!title.trim() || !text.trim() || createMutation.isPending}
           onClick={() => createMutation.mutate()}
         >
-          <Plus className="size-4" />
-          Add sample
+          {createMutation.isPending ? <Spinner /> : <Plus className="size-4" />}
+          {createMutation.isPending ? "Adding..." : "Add sample"}
         </Button>
       </div>
 
@@ -119,7 +120,11 @@ export function VoiceSamplesTab({ initialSamples }: { initialSamples: VoiceSampl
                 onClick={() => deleteMutation.mutate(sample.id)}
                 disabled={deleteMutation.isPending}
               >
-                <Trash2 className="size-4 text-[var(--missing)]" />
+                {deleteMutation.isPending && deleteMutation.variables === sample.id ? (
+                  <Spinner className="text-[var(--missing)]" />
+                ) : (
+                  <Trash2 className="size-4 text-[var(--missing)]" />
+                )}
               </Button>
             </div>
           ))}

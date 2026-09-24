@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import type { MasterProfile } from "@applydesk/shared";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { ProfileSections } from "../../profile-sections";
 
 // PROJECT_SPEC.md §4.1 — "Show the parsed result in a review screen side by
@@ -57,7 +58,8 @@ export function ImportReviewEditor({
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface px-4 py-3">
           <p className="text-sm text-text-muted">Review the parsed profile and fix anything that&apos;s wrong.</p>
-          <Button onClick={save} disabled={saving}>
+          <Button onClick={save} disabled={saving} className="gap-1.5">
+            {saving && <Spinner />}
             {saving ? "Saving…" : "Save as new version"}
           </Button>
         </div>

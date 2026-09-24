@@ -113,10 +113,15 @@ describe("selectForResume", () => {
   }
 
   it("marks the most recent experiences (current + latest end dates) as not summarized", () => {
+    // RECENT_EXPERIENCE_COUNT is 5, so this needs 6 roles to exercise
+    // summarization at all — a 5-role career (a common full resume) should
+    // get bullets on every role, matching a real resume's style.
     const profile = profileWithExperiences([
+      experience("oldest", { endDate: "2012-01" }),
       experience("old", { endDate: "2015-01" }),
       experience("mid", { endDate: "2019-01" }),
       experience("recent", { endDate: "2022-01" }),
+      experience("recent2", { endDate: "2023-01" }),
       experience("current", { current: true }),
     ]);
 
@@ -124,19 +129,21 @@ describe("selectForResume", () => {
     const summarizedIds = result.experiences.filter((e) => e.summarized).map((e) => e.id);
     const fullIds = result.experiences.filter((e) => !e.summarized).map((e) => e.id);
 
-    expect(summarizedIds).toEqual(["old"]);
-    expect(fullIds.sort()).toEqual(["current", "mid", "recent"].sort());
+    expect(summarizedIds).toEqual(["oldest"]);
+    expect(fullIds.sort()).toEqual(["current", "mid", "old", "recent", "recent2"].sort());
   });
 
   it("gives a summarized experience no bullets", () => {
     const profile = profileWithExperiences([
+      experience("oldest", { endDate: "2008-01" }),
       experience("old", { endDate: "2010-01" }),
-      experience("a", { endDate: "2020-01" }),
-      experience("b", { endDate: "2021-01" }),
-      experience("c", { current: true }),
+      experience("a", { endDate: "2018-01" }),
+      experience("b", { endDate: "2020-01" }),
+      experience("c", { endDate: "2021-01" }),
+      experience("d", { current: true }),
     ]);
     const result = selectForResume(profile, []);
-    const old = result.experiences.find((e) => e.id === "old")!;
+    const old = result.experiences.find((e) => e.id === "oldest")!;
     expect(old.summarized).toBe(true);
     expect(old.bullets).toEqual([]);
   });

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head><title>Apply — Figma</title></head>
+<body>
+  <form class="application-form">
+    <label for="name-input">Full name</label>
+    <input type="text" id="name-input" name="name" />
+
+    <label for="email-input">Email</label>
+    <input type="email" id="email-input" name="email" />
+
+    <label for="phone-input">Phone</label>
+    <input type="tel" id="phone-input" name="phone" />
+
+    <label for="resume-upload-input">Resume/CV</label>
+    <input type="file" id="resume-upload-input" name="resume" />
+
+    <label>LinkedIn URL</label>
+    <input type="text" name="urls[LinkedIn]" />
+
+    <label>GitHub URL</label>
+    <input type="text" name="urls[GitHub]" />
+
+    <label for="additional-info">Additional Information</label>
+    <textarea id="additional-info" name="comments"></textarea>
+
+    <label for="eeo-veteran">Veteran Status</label>
+    <select id="eeo-veteran" name="eeo[veteran]">
+      <option value="">Select</option>
+      <option value="I am not a veteran">I am not a veteran</option>
+      <option value="Decline to answer">Decline to answer</option>
+    </select>
+
+    <button type="submit" class="postings-btn">Submit application</button>
+  </form>
+</body>
+</html>

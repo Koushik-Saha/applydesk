@@ -34,9 +34,13 @@ export interface GenerateStructuredResult<T> {
   usage: { inputTokens: number; outputTokens: number; costUsd: number };
 }
 
-// CLAUDE.md rule 4 — every AI call goes through this: zod schema -> JSON
-// output, one retry on invalid JSON, usage logged to ai_usage.
 export class GenerationValidationError extends Error {}
+export class AiServiceError extends Error {
+  constructor(message: string, public readonly status?: number) {
+    super(message);
+    this.name = "AiServiceError";
+  }
+}
 
 export async function generateStructured<T>({
   step,
@@ -57,10 +61,29 @@ export async function generateStructured<T>({
   let lastError: Error = new GenerationValidationError("generateStructured: no attempts made");
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    const message = await getClient().messages.create(
-      { model, system, max_tokens: maxTokens, messages, output_config: { format } },
-      { timeout: timeoutMs },
-    );
+    let message: Anthropic.Message;
+    try {
+      message = await getClient().messages.create(
+        { model, system, max_tokens: maxTokens, messages, output_config: { format } },
+        { timeout: timeoutMs },
+      );
+    } catch (err: unknown) {
+      const errorObj = err as { status?: number; message?: string };
+      const status = errorObj.status;
+      if (status === 429) {
+        throw new AiServiceError("Anthropic AI rate limit reached. Please retry in a few moments.", 429);
+      }
+      if (status === 529 || status === 500 || status === 503) {
+        throw new AiServiceError(
+          "Anthropic AI service is temporarily overloaded or unavailable. Please retry shortly.",
+          status,
+        );
+      }
+      if (status === 401) {
+        throw new AiServiceError("Anthropic API key is invalid or unauthorized. Please check ANTHROPIC_API_KEY.", 401);
+      }
+      throw err;
+    }
 
     totalInputTokens += message.usage.input_tokens;
     totalOutputTokens += message.usage.output_tokens;

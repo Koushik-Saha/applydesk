@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 const TEXT_FIELDS: { key: keyof StandardAnswers; label: string }[] = [
   { key: "legalName", label: "Legal name" },
@@ -116,7 +117,8 @@ export function StandardAnswersTab({ initialAnswers }: { initialAnswers: Standar
         </div>
       </div>
 
-      <Button type="submit" className="w-fit" disabled={!isDirty || saving}>
+      <Button type="submit" className="w-fit gap-1.5" disabled={!isDirty || saving}>
+        {saving && <Spinner />}
         {saving ? "Saving…" : "Save"}
       </Button>
     </form>

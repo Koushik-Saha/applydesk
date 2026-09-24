@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { MasterProfile } from "@applydesk/shared";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { ProfileSections } from "./profile-sections";
 import { ImportUploadDialog } from "./import-upload-dialog";
 
@@ -71,7 +72,8 @@ export function ProfileEditor({ initialProfile, version }: ProfileEditorProps) {
         </div>
         <div className="flex items-center gap-2">
           <ImportUploadDialog />
-          <Button onClick={save} disabled={!dirty || saving}>
+          <Button onClick={save} disabled={!dirty || saving} className="gap-1.5">
+            {saving && <Spinner />}
             {saving ? "Saving…" : "Save"}
           </Button>
         </div>

@@ -1,0 +1,13 @@
+diff --git a/lib/react-pdf.js b/lib/react-pdf.js
+index 353bdce27133daa40109c4724712ba5c738bebf8..e42a18a285bb02f6313e9c708a8bfcfc0dea9697 100644
+--- a/lib/react-pdf.js
++++ b/lib/react-pdf.js
+@@ -296,7 +296,7 @@ const pdf = initialValue => {
+     const {
+       layout: _INTERNAL__LAYOUT__DATA_,
+       fileStream
+-    } = await render();
++    } = await render(false); // patched: compress=true produces corrupted (mismatched-length / invalid zlib header) streams in this pdfkit version — see the toString() method's own "For some reason, when rendering to string if compress=true the document is blank" comment above, which already routes around the same bug for that path.
+     callOnRender({
+       _INTERNAL__LAYOUT__DATA_
+     });

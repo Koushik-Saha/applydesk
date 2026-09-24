@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Upload } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import {
   Dialog,
   DialogContent,
@@ -63,7 +64,8 @@ export function ImportUploadDialog() {
           className="rounded-md border border-border bg-bg px-3 py-2 text-sm"
         />
         <DialogFooter>
-          <Button onClick={upload} disabled={!file || uploading}>
+          <Button onClick={upload} disabled={!file || uploading} className="gap-1.5">
+            {uploading && <Spinner />}
             {uploading ? "Uploading…" : "Upload"}
           </Button>
         </DialogFooter>

@@ -8,3 +8,6 @@ export * from "./lib/id";
 export * from "./lib/extract-metrics";
 export * from "./scoring";
 export * from "./keyword-match";
+export * from "./api-client";
+export * from "./extractors";
+export * from "./fill";

@@ -4,6 +4,7 @@ import mammoth from "mammoth";
 import { withOwner } from "@/lib/http/with-owner";
 import { jsonError } from "@/lib/http/api-error";
 import { enqueueTask } from "@/lib/tasks/enqueue";
+import { checkRateLimit } from "@/lib/security/rate-limit";
 
 const MAX_SIZE_BYTES = 5 * 1024 * 1024;
 const PDF_TYPE = "application/pdf";
@@ -12,7 +13,12 @@ const DOCX_TYPE = "application/vnd.openxmlformats-officedocument.wordprocessingm
 // PROJECT_SPEC.md §4.1 — extraction happens here (fast, synchronous); the
 // slow AI parsing step runs as a "profile_import" task.
 export async function POST(request: Request) {
-  return withOwner(async () => {
+  return withOwner(async (ownerId) => {
+    const rateCheck = checkRateLimit(`ai_${ownerId}`, { maxRequests: 20, windowMs: 60000 });
+    if (!rateCheck.success) {
+      return jsonError("rate_limited", "AI import rate limit reached. Please wait a moment.", 429);
+    }
+
     const formData = await request.formData();
     const file = formData.get("file");
 

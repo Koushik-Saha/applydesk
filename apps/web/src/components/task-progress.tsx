@@ -4,9 +4,17 @@ import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, Circle, Loader2, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { ErrorState } from "@/components/error-state";
 import { Skeleton } from "@/components/ui/skeleton";
+
+// Drive tasks throw a descriptive message but the task row only stores
+// `error.message` (see run-task.ts), so a disconnected/revoked/quota Drive
+// error is detected by text match here rather than a structured code.
+function isGoogleDriveError(message: string | null): boolean {
+  if (!message) return false;
+  return /google drive/i.test(message);
+}
 
 export interface TaskStep {
   key: string;
@@ -118,14 +126,21 @@ export function TaskProgress({ taskId, steps, onDone }: TaskProgressProps) {
       {task.status === "failed" && (
         <div className="flex items-center justify-between gap-3 border-t border-border pt-3">
           <p className="text-sm text-[var(--missing)]">{task.error ?? "Task failed."}</p>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => retryMutation.mutate()}
-            disabled={retryMutation.isPending}
-          >
-            Retry
-          </Button>
+          <div className="flex shrink-0 items-center gap-2">
+            {isGoogleDriveError(task.error) && (
+              <a href="/settings" className={buttonVariants({ variant: "outline", size: "sm" })}>
+                Reconnect Drive
+              </a>
+            )}
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => retryMutation.mutate()}
+              disabled={retryMutation.isPending}
+            >
+              Retry
+            </Button>
+          </div>
         </div>
       )}
     </div>

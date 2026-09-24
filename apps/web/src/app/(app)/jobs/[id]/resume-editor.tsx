@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import type { ResumeContent, DocumentLint, DocumentValidation } from "@applydesk/shared";
 import { BulletPair } from "@/components/bullet-pair";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 export interface ResumeVersion {
   id: string;
@@ -14,6 +15,10 @@ export interface ResumeVersion {
   lint: DocumentLint;
   validation: DocumentValidation;
   createdAt: string;
+  status?: "draft" | "approved";
+  driveFileId?: string | null;
+  driveWebViewLink?: string | null;
+  fileName?: string | null;
 }
 
 async function putJson(url: string, body: unknown) {
@@ -80,7 +85,8 @@ export function ResumeEditor({ versions, bulletTextById }: { versions: ResumeVer
           Keyword coverage: <span className="font-mono">{content.keywordCoverage.before}%</span> {"->"}{" "}
           <span className="font-mono text-[var(--met)]">{content.keywordCoverage.after}%</span>
         </span>
-        <Button size="sm" className="ml-auto" disabled={!dirty || saveMutation.isPending} onClick={() => saveMutation.mutate()}>
+        <Button size="sm" className="ml-auto gap-1.5" disabled={!dirty || saveMutation.isPending} onClick={() => saveMutation.mutate()}>
+          {saveMutation.isPending && <Spinner />}
           Save new version
         </Button>
       </div>

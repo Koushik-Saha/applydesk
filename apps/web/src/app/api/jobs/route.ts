@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { manualJobInputSchema, jobStatusSchema } from "@applydesk/shared";
 import { withOwner } from "@/lib/http/with-owner";
-import { createManualJob, listJobs, setJobStatus } from "@/lib/jobs/service";
+import { jsonError } from "@/lib/http/api-error";
+import { createManualJob, listJobs, setJobStatus, InvalidJobUrlError } from "@/lib/jobs/service";
 import { enqueueTask } from "@/lib/tasks/enqueue";
 
 export async function GET(request: Request) {
@@ -25,7 +26,15 @@ export async function POST(request: Request) {
     const body = await request.json();
     const input = manualJobInputSchema.parse(body);
 
-    const { job, duplicate } = await createManualJob(ownerId, input);
+    let job, duplicate;
+    try {
+      ({ job, duplicate } = await createManualJob(ownerId, input));
+    } catch (error) {
+      if (error instanceof InvalidJobUrlError) {
+        return jsonError("invalid_url", error.message, 400);
+      }
+      throw error;
+    }
     if (duplicate) return NextResponse.json({ job, duplicate: true });
 
     await enqueueTask("job_analyze", { jobId: job.id }, job.id);

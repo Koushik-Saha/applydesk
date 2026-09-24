@@ -31,7 +31,12 @@ export function BulletPair({ masterText, tailoredText, originalKept, lintWarning
             )}
           />
           {lintWarnings.length > 0 && (
-            <span title={lintWarnings.join("\n")} className="mt-1 shrink-0 text-amber-500">
+            <span
+              role="img"
+              aria-label={`Lint warnings: ${lintWarnings.join("; ")}`}
+              title={lintWarnings.join("\n")}
+              className="mt-1 shrink-0 text-amber-500"
+            >
               <AlertTriangle className="size-3.5" />
             </span>
           )}

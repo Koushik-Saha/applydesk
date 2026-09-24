@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNotNull } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { documents, jobs, type DocumentKind } from "@/lib/db/schema";
 
@@ -49,6 +49,58 @@ export async function listDocuments(jobId: string) {
     .orderBy(desc(documents.kind), desc(documents.version));
 }
 
+export async function getLatestDocumentByKind(jobId: string, kind: DocumentKind) {
+  const [row] = await db
+    .select()
+    .from(documents)
+    .where(and(eq(documents.jobId, jobId), eq(documents.kind, kind)))
+    .orderBy(desc(documents.version))
+    .limit(1);
+  return row ?? null;
+}
+
+export async function getDocumentByJobAndKind(jobId: string, kind: DocumentKind) {
+  const [approved] = await db
+    .select()
+    .from(documents)
+    .where(and(eq(documents.jobId, jobId), eq(documents.kind, kind), eq(documents.status, "approved")))
+    .orderBy(desc(documents.version))
+    .limit(1);
+
+  if (approved) return approved;
+  return getLatestDocumentByKind(jobId, kind);
+}
+
+// A fresh draft version's own driveFileId is null (only an approved
+// version ever gets one set) — re-approving needs the most recent
+// non-null id for this job+kind so Drive replaces the existing file
+// in place instead of creating a duplicate (§4.7 "replaced on re-approve").
+export async function getLastDriveFileId(jobId: string, kind: DocumentKind): Promise<string | null> {
+  const [row] = await db
+    .select({ driveFileId: documents.driveFileId })
+    .from(documents)
+    .where(and(eq(documents.jobId, jobId), eq(documents.kind, kind), isNotNull(documents.driveFileId)))
+    .orderBy(desc(documents.version))
+    .limit(1);
+  return row?.driveFileId ?? null;
+}
+
+export async function markDocumentApproved(
+  documentId: string,
+  params: { driveFileId?: string; driveWebViewLink?: string; fileName: string },
+): Promise<void> {
+  await db
+    .update(documents)
+    .set({
+      status: "approved",
+      driveFileId: params.driveFileId ?? null,
+      driveWebViewLink: params.driveWebViewLink ?? null,
+      fileName: params.fileName,
+      approvedAt: new Date(),
+    })
+    .where(eq(documents.id, documentId));
+}
+
 export async function getDocumentForOwner(ownerId: string, documentId: string) {
   const [row] = await db
     .select({ document: documents, ownerId: jobs.ownerId })
@@ -80,4 +132,26 @@ export async function saveDocumentEdit(ownerId: string, documentId: string, cont
     profileVersionId: existing.profileVersionId,
     promptVersion: existing.promptVersion,
   });
+}
+
+// PROJECT_SPEC.md §4.7 — "Unapprove allowed (creates a new draft version;
+// Drive files are replaced on re-approve)." Job status is one field for
+// the whole job, so approve/unapprove act on every kind that job has
+// together, not one document at a time.
+export async function unapproveJobDocuments(jobId: string): Promise<void> {
+  for (const kind of ["resume", "cover_letter"] as const) {
+    const latest = await getLatestDocumentByKind(jobId, kind);
+    if (!latest || latest.status !== "approved") continue;
+
+    await createDocumentVersion({
+      jobId: latest.jobId,
+      kind: latest.kind,
+      content: latest.content,
+      lint: latest.lint,
+      validation: latest.validation,
+      postScore: latest.postScore ?? undefined,
+      profileVersionId: latest.profileVersionId,
+      promptVersion: latest.promptVersion,
+    });
+  }
 }

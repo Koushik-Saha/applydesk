@@ -29,6 +29,7 @@ export const atsTypeSchema = z.enum([
   "indeed",
   "other",
 ]);
+export type AtsType = z.infer<typeof atsTypeSchema>;
 
 export const remoteTypeSchema = z.enum(["onsite", "remote", "hybrid"]);
 
@@ -43,3 +44,15 @@ export const manualJobInputSchema = z.object({
   remoteType: remoteTypeSchema.optional(),
 });
 export type ManualJobInput = z.infer<typeof manualJobInputSchema>;
+
+// POST /api/ext/jobs — PROJECT_SPEC.md §5.1, §8
+export const extensionJobInputSchema = z.object({
+  title: z.string().min(1),
+  company: z.string().min(1),
+  url: z.string().min(1),
+  description: z.string().min(1),
+  location: z.string().optional(),
+  remoteType: remoteTypeSchema.optional(),
+  atsType: atsTypeSchema.optional(),
+});
+export type ExtensionJobInput = z.infer<typeof extensionJobInputSchema>;

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Spinner } from "@/components/ui/spinner";
 
 // PROJECT_SPEC.md §4.2 — manual add: title, company, url, description.
 export default function NewJobPage() {
@@ -76,7 +77,8 @@ export default function NewJobPage() {
 
       {error && <p className="text-sm text-[var(--missing)]">{error}</p>}
 
-      <Button onClick={submit} disabled={!canSubmit || saving} className="w-fit">
+      <Button onClick={submit} disabled={!canSubmit || saving} className="w-fit gap-1.5">
+        {saving && <Spinner />}
         {saving ? "Saving…" : "Save job"}
       </Button>
     </div>

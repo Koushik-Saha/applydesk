@@ -26,12 +26,12 @@ export function buildSourceBulletMap(selected: SelectedContent): Map<string, str
   return map;
 }
 
+// Only the profile's own canonical, categorized skill list — not each
+// bullet's free-text skill tags, which are topic tags for evidence-matching
+// (e.g. "multi-tenant platform"), not real tool/technology names, and would
+// otherwise leak into the resume's Skills section.
 export function collectAvailableSkills(profile: MasterProfile): string[] {
-  const names = new Set<string>();
-  for (const skill of profile.skills) names.add(skill.name);
-  for (const exp of profile.experiences) for (const bullet of exp.bullets) for (const s of bullet.skills) names.add(s);
-  for (const project of profile.projects) for (const bullet of project.bullets) for (const s of bullet.skills) names.add(s);
-  return [...names];
+  return profile.skills.map((skill) => skill.name);
 }
 
 function buildRewriteInput(params: {

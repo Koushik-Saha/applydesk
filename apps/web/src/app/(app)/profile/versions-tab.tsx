@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/empty-state";
 import { ErrorState } from "@/components/error-state";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
 import type { ProfileVersionSummary } from "@/lib/profile/service";
 
 async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
@@ -94,8 +95,12 @@ export function VersionsTab({
                 onClick={() => restoreMutation.mutate(v.id)}
                 disabled={restoreMutation.isPending}
               >
-                <RotateCcw className="size-3.5" />
-                Restore
+                {restoreMutation.isPending && restoreMutation.variables === v.id ? (
+                  <Spinner className="size-3.5" />
+                ) : (
+                  <RotateCcw className="size-3.5" />
+                )}
+                {restoreMutation.isPending && restoreMutation.variables === v.id ? "Restoring..." : "Restore"}
               </Button>
             )}
           </div>

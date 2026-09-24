@@ -5,6 +5,7 @@ import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import type { CoverLetterContent, DocumentLint, DocumentValidation } from "@applydesk/shared";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 
 export interface CoverLetterVersion {
   id: string;
@@ -13,6 +14,10 @@ export interface CoverLetterVersion {
   lint: DocumentLint;
   validation: DocumentValidation;
   createdAt: string;
+  status?: "draft" | "approved";
+  driveFileId?: string | null;
+  driveWebViewLink?: string | null;
+  fileName?: string | null;
 }
 
 async function putJson(url: string, body: unknown) {
@@ -69,7 +74,8 @@ export function CoverLetterEditor({
             Original kept
           </span>
         )}
-        <Button size="sm" className="ml-auto" disabled={!dirty || saveMutation.isPending} onClick={() => saveMutation.mutate()}>
+        <Button size="sm" className="ml-auto gap-1.5" disabled={!dirty || saveMutation.isPending} onClick={() => saveMutation.mutate()}>
+          {saveMutation.isPending && <Spinner />}
           Save new version
         </Button>
       </div>

@@ -24,7 +24,10 @@ export interface SelectedContent {
 }
 
 // PROJECT_SPEC.md §4.4 step 1 — "all recent roles; older ones summarized."
-export const RECENT_EXPERIENCE_COUNT = 3;
+// 5 covers a typical resume's full career (most people have 3-6 roles worth
+// detailing) without bullets for every job someone has ever had; the PDF's
+// auto-shrink-to-one-page (render.ts) is the safety net if that runs long.
+export const RECENT_EXPERIENCE_COUNT = 5;
 export const MAX_BULLETS_PER_EXPERIENCE = 4;
 
 const MONTHS: Record<string, number> = {

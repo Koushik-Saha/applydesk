@@ -44,6 +44,44 @@ export const resumeEducationSchema = z.object({
 });
 export type ResumeEducation = z.infer<typeof resumeEducationSchema>;
 
+// Projects, certifications and publications are copied verbatim from the
+// profile in code (assemble.ts) — same "never written by the model" rule as
+// company/title/dates above. DESIGN.md §11 lists both as optional sections.
+export const resumeProjectSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  description: z.string().optional(),
+  url: z.string().optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+});
+export type ResumeProject = z.infer<typeof resumeProjectSchema>;
+
+export const resumeCertificationSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  issuer: z.string().optional(),
+  date: z.string().optional(),
+});
+export type ResumeCertification = z.infer<typeof resumeCertificationSchema>;
+
+export const resumePublicationSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  publisher: z.string().optional(),
+  date: z.string().optional(),
+});
+export type ResumePublication = z.infer<typeof resumePublicationSchema>;
+
+// Skills grouped by the profile's own category labels (e.g. "Frontend",
+// "Cloud & DevOps") so the PDF can render them the way a real resume does,
+// instead of one flat comma-joined wall of text.
+export const resumeSkillGroupSchema = z.object({
+  category: z.string(),
+  skills: z.array(z.string()),
+});
+export type ResumeSkillGroup = z.infer<typeof resumeSkillGroupSchema>;
+
 export const resumeContentSchema = z.object({
   contactFullName: z.string(),
   contactEmail: z.string().optional(),
@@ -54,8 +92,12 @@ export const resumeContentSchema = z.object({
   contactPortfolio: z.string().optional(),
   summary: z.string(),
   experiences: z.array(resumeExperienceSchema),
+  projects: z.array(resumeProjectSchema).default([]),
   education: z.array(resumeEducationSchema),
+  certifications: z.array(resumeCertificationSchema).default([]),
+  publications: z.array(resumePublicationSchema).default([]),
   skills: z.array(z.string()),
+  skillGroups: z.array(resumeSkillGroupSchema).default([]),
   // §4.4 step 5 — keyword coverage before (from the job_analysis) vs after
   // (recomputed against this tailored document).
   keywordCoverage: z.object({

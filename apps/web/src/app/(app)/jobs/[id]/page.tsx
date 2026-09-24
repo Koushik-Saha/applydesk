@@ -1,16 +1,20 @@
 import { notFound, redirect } from "next/navigation";
+import { eq } from "drizzle-orm";
 import {
   coverLetterContentSchema,
   documentLintSchema,
   documentValidationSchema,
   resumeContentSchema,
 } from "@applydesk/shared";
+import { db } from "@/lib/db/client";
+import { jobFolders } from "@/lib/db/schema";
 import { requireOwner } from "@/lib/auth/require-owner";
 import { AuthError } from "@/lib/auth/errors";
 import { getJob, getLatestAnalysis } from "@/lib/jobs/service";
 import { getLatestTaskForJob } from "@/lib/tasks/get-task";
 import { getProfileVersionById } from "@/lib/profile/service";
 import { listDocuments } from "@/lib/documents/service";
+import { getConnection } from "@/lib/google/service";
 import { requirementsSchema, evidenceItemSchema } from "@/lib/ai/prompts/job-analyze";
 import { JobDetail } from "./job-detail";
 import { z } from "zod";
@@ -42,12 +46,16 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
   const job = await getJob(ownerId, id);
   if (!job) notFound();
 
-  const [analysis, analyzeTask, generateTask, documentRows] = await Promise.all([
-    getLatestAnalysis(job.id),
-    getLatestTaskForJob(job.id, "job_analyze"),
-    getLatestTaskForJob(job.id, "job_generate"),
-    listDocuments(job.id),
-  ]);
+  const [analysis, analyzeTask, generateTask, approveTask, documentRows, googleConn, [jobFolder]] =
+    await Promise.all([
+      getLatestAnalysis(job.id),
+      getLatestTaskForJob(job.id, "job_analyze"),
+      getLatestTaskForJob(job.id, "job_generate"),
+      getLatestTaskForJob(job.id, "document_approve"),
+      listDocuments(job.id),
+      getConnection(ownerId),
+      db.select().from(jobFolders).where(eq(jobFolders.jobId, job.id)).limit(1),
+    ]);
 
   // evidenceBulletIds / sourceBulletIds refer to whichever profile version
   // was active WHEN that analysis/generation ran, not necessarily today's.
@@ -73,7 +81,13 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
       version: d.version,
       content: resumeContentSchema.parse(d.content),
       lint: documentLintSchema.parse(d.lint ?? { warnings: [] }),
-      validation: documentValidationSchema.parse(d.validation ?? { violations: [], fallbackBulletIndexes: [] }),
+      validation: documentValidationSchema.parse(
+        d.validation ?? { violations: [], fallbackBulletIndexes: [] },
+      ),
+      status: d.status,
+      driveFileId: d.driveFileId,
+      driveWebViewLink: d.driveWebViewLink,
+      fileName: d.fileName,
       createdAt: d.createdAt.toISOString(),
     }));
 
@@ -84,7 +98,13 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
       version: d.version,
       content: coverLetterContentSchema.parse(d.content),
       lint: documentLintSchema.parse(d.lint ?? { warnings: [] }),
-      validation: documentValidationSchema.parse(d.validation ?? { violations: [], fallbackBulletIndexes: [] }),
+      validation: documentValidationSchema.parse(
+        d.validation ?? { violations: [], fallbackBulletIndexes: [] },
+      ),
+      status: d.status,
+      driveFileId: d.driveFileId,
+      driveWebViewLink: d.driveWebViewLink,
+      fileName: d.fileName,
       createdAt: d.createdAt.toISOString(),
     }));
 
@@ -93,7 +113,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
       // remounts JobDetail with fresh props whenever the underlying data
       // actually changes (e.g. after router.refresh() once analysis
       // completes) instead of leaving stale client state in place.
-      key={`${job.status}-${analysis?.id ?? "none"}-${resumeVersions.length}-${coverLetterVersions.length}`}
+      key={`${job.status}-${analysis?.id ?? "none"}-${resumeVersions.length}-${coverLetterVersions.length}-${approveTask?.id ?? "none"}`}
       job={{
         id: job.id,
         title: job.title,
@@ -118,6 +138,13 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
       }
       analyzeTask={analyzeTask}
       generateTask={generateTask}
+      approveTask={approveTask}
+      jobFolder={
+        jobFolder
+          ? { folderId: jobFolder.driveFolderId, folderLink: jobFolder.driveFolderLink }
+          : null
+      }
+      googleConnected={!!googleConn}
       resumeVersions={resumeVersions}
       coverLetterVersions={coverLetterVersions}
       bulletTextById={bulletTextById}

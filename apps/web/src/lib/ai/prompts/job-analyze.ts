@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const PROMPT_VERSION = "job-analyze@1";
+export const PROMPT_VERSION = "job-analyze@2";
 
 // PROJECT_SPEC.md §4.3 step 1 — extract requirements.
 export const requirementsSchema = z.object({
@@ -54,5 +54,7 @@ For every requirement in the input list, return exactly one result item with:
 - status: "met" if the candidate's bullets clearly demonstrate it, "partial" if related but not a clear match, "missing" if nothing supports it.
 - evidenceBulletIds: the ids of the specific bullets that support your status. Use ONLY ids from the list you were given — never invent an id, and leave this empty for "missing".
 - reason: one short sentence explaining your judgment, referencing what the evidence actually says.
+
+A requirement can combine evidence from multiple bullets — cite every bullet id that contributes. If a requirement asks for two things (e.g. "shipped Python and React in production") and one bullet demonstrates one part while a different bullet demonstrates the other, that's "met" with both ids cited, not "partial" — the two things don't need to appear in the same bullet, or the same project, to both be true of the candidate. Reserve "partial" for when the bullets show something related but don't actually establish the requirement (e.g. they show React but never Python at all), not for when the full requirement is demonstrated only by combining separate bullets.
 
 Do not credit a requirement based on anything not literally present in the given bullets.`;
